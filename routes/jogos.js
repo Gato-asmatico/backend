@@ -12,8 +12,11 @@ module.exports = function (express, db) {
   jogos.get("/", (req, res) => {
     db.serialize(() => {
       db.all(`SELECT * FROM jogos`, (err, rows) => {
-        if (err) return res.send(dbErrMessage);
-        res.json(rows);
+        if (err) {
+          console.error(err);
+          return res.json({ success: false, content: dbErrMessage });
+        }
+        res.json({ success: true, content: rows });
       });
     });
   });
@@ -40,8 +43,11 @@ module.exports = function (express, db) {
 
     db.serialize(() => {
       db.all(sqlInput, (err, rows) => {
-        if (err) return res.send(dbErrMessage);
-        res.json(rows);
+        if (err) {
+          console.error(err);
+          return res.json({ success: false, content: dbErrMessage });
+        }
+        res.json({ success: true, content: rows });
       });
     });
   });
@@ -50,17 +56,21 @@ module.exports = function (express, db) {
     const generos = [];
     db.serialize(() => {
       db.all("SELECT genero FROM jogos", (err, rows) => {
-        if (err) return res.send(dbErrMessage);
+        if (err) {
+          console.error(err);
+          return res.json({ success: false, content: dbErrMessage });
+        }
 
-        res.json(
-          rows
+        res.json({
+          success: true,
+          content: rows
             .map(({ genero }, index, array) => {
               if (generos.includes(genero)) return "";
               generos.push(genero);
               return genero;
             })
-            .filter((x) => x)
-        );
+            .filter((x) => x),
+        });
       });
     });
   });
@@ -77,8 +87,11 @@ module.exports = function (express, db) {
       db.all(
         `SELECT * FROM jogos WHERE genero LIKE '${genero}'`,
         (err, rows) => {
-          if (err) return res.send(dbErrMessage);
-          res.json(rows);
+          if (err) {
+            console.error(err);
+            return res.json({ success: false, content: dbErrMessage });
+          }
+          res.json({ success: true, content: rows });
         }
       );
     });
