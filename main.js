@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const { jogos, account } = require("./routes/routes");
 
-const port = 3000;
+const port = 3001;
 
 /*
 Falta fazer:
@@ -25,6 +25,6 @@ app.use((req, res, next) => {
 app.use("/jogos", jogos);
 app.use("/account", account);
 
-app.listen(port, () => {
+app.listen(port,"0.0.0.0", () => {
   console.log(`http://localhost:${port}`);
 });
