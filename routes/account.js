@@ -16,7 +16,7 @@ module.exports = function (express, db) {
     });
 
     req.on("end", () => {
-      const { nickname, password } = JSON.parse(json);
+      const { nickname, email, password } = JSON.parse(json);
       
       const hash = crypto
         .createHash("sha256")
@@ -27,14 +27,15 @@ module.exports = function (express, db) {
 
       db.serialize(() => {
         db.get(
-          `SELECT password FROM accounts WHERE nickname LIKE '${nickname}'`,
-          (err, { password }) => {
-
+          `SELECT password FROM accounts WHERE (nickname LIKE '${nickname}' OR email LIKE '${email}')`,
+          (err, row ) => {
             if (err) {
               console.error(err);
-              return res.json({ sucess: false, content: cadErrMessage });
+              return res.json({ success: false, content: cadErrMessage });
             }
+            if(!row)return res.json({success:false, content:"Usuário não cadastrado"}) ;
 
+            const {password} = row;
             if (password == hash) {
               res.json({
                 success: true,
@@ -42,7 +43,7 @@ module.exports = function (express, db) {
               });
             } else {
               res.json({
-                sucess: false,
+                success: false,
                 content: "Credenciais incorretas!",
               });
             }
@@ -71,12 +72,12 @@ module.exports = function (express, db) {
 
       db.serialize(() => {
         db.get(
-          `SELECT * FROM accounts WHERE nickname LIKE '${nickname}'`,
+          `SELECT * FROM accounts WHERE (nickname LIKE '${nickname}' OR email LIKE '${email}')`,
           (err, row) => {
 
             if (err) {
               console.error(err);
-              return res.json({ sucess: false, content: cadErrMessage });
+              return res.json({ success: false, content: cadErrMessage });
             }
 
             if (!row) {
@@ -86,14 +87,14 @@ module.exports = function (express, db) {
 
                   if (err) {
                     console.error(err);
-                    return res.json({ sucess: false, content: cadErrMessage });
+                    return res.json({ success: false, content: cadErrMessage });
                   }
 
-                  return res.json({ sucess: true, content: "Cadastrado!" });
+                  return res.json({ success: true, content: "Cadastrado!" });
                 }
               );
             } else {
-              return res.json({ sucess: false, content: "Nickname já cadastrado!" });
+              return res.json({ success: false, content: "Usuário já cadastrado!" });
             }
           }
         );
